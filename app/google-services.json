@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "494258657601",
+    "project_id": "curs-3a761",
+    "storage_bucket": "curs-3a761.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494258657601:android:b3aefda8b8b3b910fce9c0",
+        "android_client_info": {
+          "package_name": "com.example.curs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494258657601-9jsscrdnvsv4prg8un3413hbs3oddgu9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5tJOnV2sKGqnJOf1RGsKfGLUrnyy5byo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494258657601-9jsscrdnvsv4prg8un3413hbs3oddgu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
