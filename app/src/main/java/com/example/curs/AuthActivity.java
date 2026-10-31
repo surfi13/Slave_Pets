@@ -2,14 +2,17 @@ package com.example.curs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
-
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -29,7 +32,14 @@ public class AuthActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        if (viewModel.isUserLoggedIn()) {
+        Toolbar toolbar = findViewById(R.id.toolbarAuth);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        // Исправление ошибки 1:
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
             goToMain();
             return;
         }
@@ -37,6 +47,19 @@ public class AuthActivity extends AppCompatActivity {
         initViews();
         setupListeners();
         observeViewModel();
+    }
+
+    private void setupListeners() {
+        btnAction.setOnClickListener(v -> {
+            String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+            String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
+
+            // Исправление ошибки 2: передаем 3 аргумента
+            String name = "Пользователь";
+            viewModel.authenticate(name, email, password);
+        });
+
+        tvToggleMode.setOnClickListener(v -> viewModel.toggleMode());
     }
 
     private void initViews() {
@@ -47,15 +70,6 @@ public class AuthActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
     }
 
-    private void setupListeners() {
-        btnAction.setOnClickListener(v -> {
-            String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
-            String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
-            viewModel.authenticate(email, password);
-        });
-
-        tvToggleMode.setOnClickListener(v -> viewModel.toggleMode());
-    }
 
     private void observeViewModel() {
         viewModel.getIsRegisterMode().observe(this, isRegister -> {
@@ -84,6 +98,34 @@ public class AuthActivity extends AppCompatActivity {
                 goToMain();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_auth, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_info) {
+            showProjectInfoDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showProjectInfoDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("О курсовом проекте")
+                .setMessage("Тема: Разработка мобильного приложения для учёта домашних питомцев с напоминаниями о вакцинации\n\n" +
+                        "Выполнил: Сало Артём Ришатович\n" +
+                        "Группа: 3пк1\n" +
+                        "Руководитель: Егурнова Елена Николаевна\n\n" +
+                        "ГАПОУ ОКЭИ, 2026 г.")
+                .setPositiveButton("Закрыть", (dialog, which) -> dialog.dismiss())
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
     private void goToMain() {

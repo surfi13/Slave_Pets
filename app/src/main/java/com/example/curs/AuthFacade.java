@@ -38,6 +38,9 @@ public class AuthFacade {
                     }
                 });
     }
+    public void logout() {
+        mAuth.signOut();
+    }
 
     public interface AuthCallback {
         void onSuccess();

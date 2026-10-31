@@ -1,20 +1,22 @@
 package com.example.curs;
 
+
+import android.app.Application;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class AuthViewModel extends ViewModel {
-
-    private final AuthFacade authFacade;
-
+public class AuthViewModel extends AndroidViewModel {
+    private final AuthRepository authRepository;
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isAuthSuccessful = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isRegisterMode = new MutableLiveData<>(false);
 
-    public AuthViewModel() {
-        authFacade = new AuthFacade();
+    public AuthViewModel(@NonNull Application application) {
+        super(application);
+        authRepository = new AuthRepository(application);
     }
 
     public LiveData<Boolean> getIsLoading() { return isLoading; }
@@ -27,7 +29,7 @@ public class AuthViewModel extends ViewModel {
         isRegisterMode.setValue(currentMode == null || !currentMode);
     }
 
-    public void authenticate(String email, String password) {
+    public void authenticate(String name, String email, String password) {
         if (email.isEmpty() || password.isEmpty()) {
             errorMessage.setValue("Заполните все поля");
             return;
@@ -37,41 +39,27 @@ public class AuthViewModel extends ViewModel {
             return;
         }
 
-        isLoading.setValue(true);
-        errorMessage.setValue(null);
+        isLoading.postValue(true);
+        errorMessage.postValue(null);
+
+        AuthRepository.AuthCallback callback = new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                isLoading.postValue(false);
+                isAuthSuccessful.postValue(true);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                isLoading.postValue(false);
+                errorMessage.postValue(message);
+            }
+        };
 
         if (Boolean.TRUE.equals(isRegisterMode.getValue())) {
-            authFacade.register(email, password, new AuthFacade.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    isLoading.setValue(false);
-                    isAuthSuccessful.setValue(true);
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    isLoading.setValue(false);
-                    errorMessage.setValue(message);
-                }
-            });
+            authRepository.register(name, email, password, callback);
         } else {
-            authFacade.login(email, password, new AuthFacade.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    isLoading.setValue(false);
-                    isAuthSuccessful.setValue(true);
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    isLoading.setValue(false);
-                    errorMessage.setValue(message);
-                }
-            });
+            authRepository.login(email, password, callback);
         }
-    }
-
-    public boolean isUserLoggedIn() {
-        return authFacade.getCurrentUser() != null;
     }
 }
