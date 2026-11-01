@@ -1,7 +1,11 @@
-package com.example.curs;
+package com.example.curs.data.repository;
 
 
 import android.app.Application;
+
+import com.example.curs.data.local.AppDatabase;
+import com.example.curs.data.local.UserDao;
+import com.example.curs.data.local.UserEntity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.concurrent.ExecutorService;

@@ -1,4 +1,4 @@
-package com.example.curs;
+package com.example.curs.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -6,6 +6,8 @@ import android.net.Network;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.example.curs.data.repository.PetRepository;
 
 
 public class NetworkMonitor {

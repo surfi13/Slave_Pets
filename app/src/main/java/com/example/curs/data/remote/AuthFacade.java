@@ -1,4 +1,4 @@
-package com.example.curs;
+package com.example.curs.data.remote;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
