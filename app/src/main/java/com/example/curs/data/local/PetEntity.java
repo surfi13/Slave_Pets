@@ -1,16 +1,17 @@
-package com.example.curs;
+package com.example.curs.data.local;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
-@Entity(tableName = "users")
-public class UserEntity {
+@Entity(tableName = "pets")
+public class PetEntity {
     @PrimaryKey
     @NonNull
     public String id;
     public String name;
-    public String email;
-    public String passwordHash;
+    public String species;
+    public String breed;
+    public long birthDate;
+    public String photoUrl;
     public boolean isSynced;
 }

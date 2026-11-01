@@ -1,12 +1,11 @@
-package com.example.curs;
-
+package com.example.curs.data.local;
 
 import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {PetEntity.class, UserEntity.class}, version = 2, exportSchema = false)
+@Database(entities = {PetEntity.class, UserEntity.class}, version = 2, exportSchema = false) // <-- УВЕЛИЧЬТЕ ВЕРСИЮ
 public abstract class AppDatabase extends RoomDatabase {
     public abstract PetDao petDao();
     public abstract UserDao userDao();
@@ -19,7 +18,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "pet_database")
-                            .fallbackToDestructiveMigration()
+                            .fallbackToDestructiveMigration() // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
                             .build();
                 }
             }

@@ -1,10 +1,12 @@
-package com.example.curs;
+package com.example.curs.data.repository;
 
 import android.app.Application;
 import android.util.Log;
 
+import com.example.curs.data.local.AppDatabase;
+import com.example.curs.data.local.PetDao;
+import com.example.curs.data.local.PetEntity;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +29,9 @@ public class PetRepository {
             petDao.insertPet(pet);
             syncPetToFirebase(pet);
         });
+    }
+    public androidx.lifecycle.LiveData<java.util.List<PetEntity>> getAllPets() {
+        return petDao.getAllPets();
     }
 
     private void syncPetToFirebase(PetEntity pet) {

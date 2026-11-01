@@ -1,4 +1,4 @@
-package com.example.curs;
+package com.example.curs.data.local;
 
 import androidx.room.Dao;
 import androidx.room.Insert;

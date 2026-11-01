@@ -1,4 +1,4 @@
-package com.example.curs;
+package com.example.curs.ui.auth;
 
 
 import android.app.Application;
@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import com.example.curs.data.repository.AuthRepository;
 
 public class AuthViewModel extends AndroidViewModel {
     private final AuthRepository authRepository;

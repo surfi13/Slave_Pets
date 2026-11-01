@@ -1,4 +1,4 @@
-package com.example.curs;
+package com.example.curs.data.local;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
