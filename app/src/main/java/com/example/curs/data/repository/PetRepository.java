@@ -2,12 +2,12 @@ package com.example.curs.data.repository;
 
 import android.app.Application;
 import android.util.Log;
-
+import androidx.lifecycle.LiveData;
 import com.example.curs.data.local.AppDatabase;
 import com.example.curs.data.local.PetDao;
 import com.example.curs.data.local.PetEntity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,15 +23,16 @@ public class PetRepository {
         db = FirebaseFirestore.getInstance();
     }
 
+    public LiveData<List<PetEntity>> getAllPets() {
+        return petDao.getAllPets();
+    }
+
     public void savePet(PetEntity pet) {
         executor.execute(() -> {
             pet.isSynced = false;
             petDao.insertPet(pet);
             syncPetToFirebase(pet);
         });
-    }
-    public androidx.lifecycle.LiveData<java.util.List<PetEntity>> getAllPets() {
-        return petDao.getAllPets();
     }
 
     private void syncPetToFirebase(PetEntity pet) {
@@ -44,10 +45,11 @@ public class PetRepository {
                     });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Sync", "Ошибка синхронизации, попробуем позже");
+                    Log.e("Sync", "Ошибка сохранения: " + e.getMessage());
                 });
     }
 
+    // МЕТОД, КОТОРЫЙ ТРЕБУЕТ ВАШ NetworkMonitor
     public void syncPendingData() {
         executor.execute(() -> {
             List<PetEntity> unsyncedPets = petDao.getUnsyncedPets();
@@ -57,15 +59,25 @@ public class PetRepository {
         });
     }
 
-    public void fetchFromCloud() {
-        db.collection("pets").get().addOnSuccessListener(queryDocumentSnapshots -> {
-            List<PetEntity> cloudPets = queryDocumentSnapshots.toObjects(PetEntity.class);
-            executor.execute(() -> {
-                for (PetEntity pet : cloudPets) {
-                    pet.isSynced = true;
-                    petDao.insertPet(pet);
-                }
-            });
-        });
+    // МЕТОД ДЛЯ ЗАГРУЗКИ ПРИ СТАРТЕ (вызывается в MainActivity)
+    public void fetchPetsFromCloud() {
+        String userId = FirebaseAuth.getInstance().getUid();
+        if (userId == null) return;
+
+        db.collection("pets")
+                .whereEqualTo("ownerId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<PetEntity> cloudPets = queryDocumentSnapshots.toObjects(PetEntity.class);
+                    executor.execute(() -> {
+                        for (PetEntity pet : cloudPets) {
+                            pet.isSynced = true;
+                            petDao.insertPet(pet);
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Sync", "Ошибка скачивания: " + e.getMessage());
+                });
     }
 }

@@ -1,25 +1,28 @@
 package com.example.curs.data.repository;
 
-
-import android.app.Application;
-
+import android.util.Log;
 import com.example.curs.data.local.AppDatabase;
+import com.example.curs.data.local.PetDao;
+import com.example.curs.data.local.PetEntity;
 import com.example.curs.data.local.UserDao;
 import com.example.curs.data.local.UserEntity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AuthRepository {
     private final UserDao userDao;
+    private final PetDao petDao;
     private final FirebaseAuth mAuth;
     private final FirebaseFirestore db;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public AuthRepository(Application application) {
+    public AuthRepository(android.app.Application application) {
         AppDatabase database = AppDatabase.getDatabase(application);
         userDao = database.userDao();
+        petDao = database.petDao();
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
     }
@@ -29,50 +32,25 @@ public class AuthRepository {
         void onFailure(String message);
     }
 
-    public void register(String name, String email, String password, AuthCallback callback) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult().getUser() != null) {
-                        String uid = task.getResult().getUser().getUid();
-
-                        UserEntity newUser = new UserEntity();
-                        newUser.id = uid;
-                        newUser.name = name;
-                        newUser.email = email;
-                        newUser.passwordHash = password;
-                        newUser.isSynced = true;
-
-                        executor.execute(() -> {
-                            userDao.insertUser(newUser);
-                            db.collection("users").document(uid).set(newUser);
-                        });
-                        callback.onSuccess();
-                    } else {
-                        callback.onFailure("Ошибка регистрации: " + task.getException().getMessage());
-                    }
-                });
-    }
-
     public void login(String email, String password, AuthCallback callback) {
-        // Сначала пытаемся найти пользователя в локальной базе данных (Room)
         executor.execute(() -> {
+            // 1. Проверяем локальную базу (офлайн-вход)
             UserEntity localUser = userDao.getUserByEmail(email);
-
-            // Если пользователь найден локально и пароль совпадает
             if (localUser != null && localUser.passwordHash.equals(password)) {
-                // Успешный вход офлайн (или онлайн, но через кэш)
                 callback.onSuccess();
-
-                // Опционально: если есть интернет, можно в фоне обновить токен Firebase
-                // mAuth.signInWithEmailAndPassword(email, password);
+                syncUserDataFromCloud(localUser.id);
             } else {
-                // Если локально не нашли, пробуем через Firebase (только если есть интернет)
-                // ВАЖНО: Оборачиваем в try-catch, чтобы поймать ошибку отсутствия сети
+                // 2. Если локально нет, идем в Firebase
                 try {
                     mAuth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful() && task.getResult().getUser() != null) {
                                     String uid = task.getResult().getUser().getUid();
+
+                                    // СНАЧАЛА СООБЩАЕМ ОБ УСПЕХЕ (чтобы UI перешел на главный экран)
+                                    callback.onSuccess();
+
+                                    // ПОТОМ В ФОНЕ СОХРАНЯЕМ ПОЛЬЗОВАТЕЛЯ И КАЧАЕМ ДАННЫЕ
                                     db.collection("users").document(uid).get()
                                             .addOnSuccessListener(documentSnapshot -> {
                                                 UserEntity cloudUser = documentSnapshot.toObject(UserEntity.class);
@@ -80,7 +58,7 @@ public class AuthRepository {
                                                     cloudUser.passwordHash = password;
                                                     cloudUser.isSynced = true;
                                                     executor.execute(() -> userDao.insertUser(cloudUser));
-                                                    callback.onSuccess();
+                                                    syncUserDataFromCloud(uid);
                                                 }
                                             });
                                 } else {
@@ -88,18 +66,53 @@ public class AuthRepository {
                                 }
                             })
                             .addOnFailureListener(e -> {
-                                // Если произошла ошибка сети, сообщаем пользователю
                                 if (e instanceof com.google.firebase.FirebaseNetworkException) {
-                                    callback.onFailure("Нет подключения к интернету. Войдите с аккаунтом, который уже использовался на этом устройстве.");
+                                    callback.onFailure("Нет интернета. Войдите с аккаунтом, который уже использовался.");
                                 } else {
                                     callback.onFailure("Ошибка входа: " + e.getMessage());
                                 }
                             });
                 } catch (Exception e) {
-                    // Дополнительная страховка от краша
-                    callback.onFailure("Ошибка сети. Проверьте подключение.");
+                    callback.onFailure("Критическая ошибка: " + e.getMessage());
                 }
             }
         });
+    }
+
+    public void syncUserDataFromCloud(String userId) {
+        if (userId == null) return;
+        db.collection("pets").whereEqualTo("ownerId", userId).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<PetEntity> cloudPets = queryDocumentSnapshots.toObjects(PetEntity.class);
+                    executor.execute(() -> {
+                        for (PetEntity pet : cloudPets) {
+                            pet.isSynced = true;
+                            petDao.insertPet(pet);
+                        }
+                    });
+                });
+    }
+
+    public void register(String name, String email, String password, AuthCallback callback) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().getUser() != null) {
+                        String uid = task.getResult().getUser().getUid();
+                        UserEntity newUser = new UserEntity();
+                        newUser.id = uid;
+                        newUser.name = name;
+                        newUser.email = email;
+                        newUser.passwordHash = password;
+                        newUser.isSynced = true;
+
+                        executor.execute(() -> userDao.insertUser(newUser));
+                        db.collection("users").document(uid).set(newUser);
+
+                        callback.onSuccess();
+                    } else {
+                        callback.onFailure("Ошибка регистрации: " +
+                                (task.getException() != null ? task.getException().getMessage() : "Неизвестно"));
+                    }
+                });
     }
 }

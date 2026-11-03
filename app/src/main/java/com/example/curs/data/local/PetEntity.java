@@ -9,6 +9,7 @@ public class PetEntity {
     @NonNull
     public String id;
     public String name;
+    public String ownerId;
     public String species;
     public String breed;
     public long birthDate;

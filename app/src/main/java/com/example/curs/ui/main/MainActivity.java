@@ -1,19 +1,20 @@
 package com.example.curs.ui.main;
 
-import com.example.curs.R;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.example.curs.R;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.curs.data.remote.AuthFacade;
 import com.example.curs.data.repository.PetRepository;
 import com.example.curs.ui.auth.AuthActivity;
-import com.example.curs.data.PetAdapter;
+import com.example.curs.ui.main.PetAdapter;
 import com.example.curs.ui.AddEditPetActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -26,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Теперь R будет находиться без проблем
         setContentView(R.layout.activity_main);
 
         authFacade = new AuthFacade();
@@ -40,19 +40,18 @@ public class MainActivity extends AppCompatActivity {
         adapter = new PetAdapter();
         recyclerView.setAdapter(adapter);
 
-        // Слушаем изменения из Room
+        // Подписываемся на обновления из Room (как только данные скачаются, они появятся)
         petRepository.getAllPets().observe(this, pets -> {
             adapter.setPets(pets);
         });
+
+        // ЗАПУСКАЕМ СИНХРОНИЗАЦИЮ С ОБЛАКОМ ПРИ ОТКРЫТИИ ЭКРАНА
+        petRepository.fetchPetsFromCloud();
 
         FloatingActionButton fab = findViewById(R.id.fabAddPet);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddEditPetActivity.class);
             startActivity(intent);
-        });
-
-        adapter.setListener(pet -> {
-            Toast.makeText(this, "Выбран: " + pet.name, Toast.LENGTH_SHORT).show();
         });
     }
 

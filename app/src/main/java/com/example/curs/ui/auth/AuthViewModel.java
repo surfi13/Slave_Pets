@@ -1,12 +1,12 @@
 package com.example.curs.ui.auth;
 
-
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
 import com.example.curs.data.repository.AuthRepository;
 
 public class AuthViewModel extends AndroidViewModel {
@@ -36,10 +36,6 @@ public class AuthViewModel extends AndroidViewModel {
             errorMessage.setValue("Заполните все поля");
             return;
         }
-        if (password.length() < 6) {
-            errorMessage.setValue("Пароль должен содержать минимум 6 символов");
-            return;
-        }
 
         isLoading.postValue(true);
         errorMessage.postValue(null);
@@ -47,14 +43,19 @@ public class AuthViewModel extends AndroidViewModel {
         AuthRepository.AuthCallback callback = new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess() {
-                isLoading.postValue(false);
-                isAuthSuccessful.postValue(true);
+                // Принудительно выполняем в главном потоке (UI)
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    isLoading.setValue(false);
+                    isAuthSuccessful.setValue(true);
+                });
             }
 
             @Override
             public void onFailure(String message) {
-                isLoading.postValue(false);
-                errorMessage.postValue(message);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    isLoading.setValue(false);
+                    errorMessage.setValue(message);
+                });
             }
         };
 

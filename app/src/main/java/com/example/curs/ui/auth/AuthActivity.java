@@ -40,28 +40,19 @@ public class AuthActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Исправление ошибки 1:
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
-            goToMain();
-            return;
+        // Проверяем, авторизован ли уже пользователь
+        try {
+            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+                goToMain();
+                return;
+            }
+        } catch (Exception e) {
+            // Игнорируем ошибку, если нет сети
         }
 
         initViews();
         setupListeners();
         observeViewModel();
-    }
-
-    private void setupListeners() {
-        btnAction.setOnClickListener(v -> {
-            String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
-            String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
-
-            // Исправление ошибки 2: передаем 3 аргумента
-            String name = "Пользователь";
-            viewModel.authenticate(name, email, password);
-        });
-
-        tvToggleMode.setOnClickListener(v -> viewModel.toggleMode());
     }
 
     private void initViews() {
@@ -72,21 +63,30 @@ public class AuthActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
     }
 
+    private void setupListeners() {
+        btnAction.setOnClickListener(v -> {
+            String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+            String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
+            String name = "Пользователь";
+            viewModel.authenticate(name, email, password);
+        });
+
+        tvToggleMode.setOnClickListener(v -> viewModel.toggleMode());
+    }
 
     private void observeViewModel() {
         viewModel.getIsRegisterMode().observe(this, isRegister -> {
-            if (isRegister) {
-                btnAction.setText("Зарегистрироваться");
-                tvToggleMode.setText("Уже есть аккаунт? Войти");
-            } else {
-                btnAction.setText("Войти");
-                tvToggleMode.setText("Нет аккаунта? Зарегистрироваться");
+            if (isRegister != null) {
+                btnAction.setText(isRegister ? "Зарегистрироваться" : "Войти");
+                tvToggleMode.setText(isRegister ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться");
             }
         });
 
         viewModel.getIsLoading().observe(this, isLoading -> {
-            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            btnAction.setEnabled(!isLoading);
+            if (isLoading != null) {
+                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                btnAction.setEnabled(!isLoading);
+            }
         });
 
         viewModel.getErrorMessage().observe(this, error -> {
@@ -120,11 +120,7 @@ public class AuthActivity extends AppCompatActivity {
     private void showProjectInfoDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("О курсовом проекте")
-                .setMessage("Тема: Разработка мобильного приложения для учёта домашних питомцев с напоминаниями о вакцинации\n\n" +
-                        "Выполнил: Сало Артём Ришатович\n" +
-                        "Группа: 3пк1\n" +
-                        "Руководитель: Егурнова Елена Николаевна\n\n" +
-                        "ГАПОУ ОКЭИ, 2026 г.")
+                .setMessage("Тема: Разработка мобильного приложения...\n\nВыполнил: Ваше Имя")
                 .setPositiveButton("Закрыть", (dialog, which) -> dialog.dismiss())
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show();
@@ -132,7 +128,8 @@ public class AuthActivity extends AppCompatActivity {
 
     private void goToMain() {
         Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish();
+        finish(); // Закрываем экран авторизации
     }
 }

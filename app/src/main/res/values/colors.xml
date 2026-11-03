@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Основные брендовые цвета (базовые) -->
+    <color name="pink_primary">#D81B60</color>          <!-- Насыщенный розовый (для кнопок, акцентов) -->
+    <color name="pink_primary_dark">#AD1457</color>     <!-- Темный розовый (для нажатий, теней) -->
+    <color name="pink_primary_light">#FCE4EC</color>    <!-- Очень светлый розовый (для фона) -->
+
+    <color name="pink_secondary">#F06292</color>        <!-- Мягкий розовый (для второстепенных элементов) -->
+    <color name="pink_accent">#FF4081</color>           <!-- Яркий акцент (Floating Action Button) -->
+
+    <!-- Цвета для светлой темы (Light Mode) -->
+    <color name="background_light">#FFF8F9</color>      <!-- Почти белый с легким розовым оттенком -->
+    <color name="surface_light">#FFFFFF</color>         <!-- Белый для карточек -->
+    <color name="text_primary_light">#212121</color>    <!-- Темно-серый для текста (лучше, чем черный) -->
+    <color name="text_secondary_light">#757575</color>  <!-- Серый для подписей -->
+
+    <!-- Цвета для темной темы (Dark Mode) -->
+    <color name="background_dark">#1C1215</color>       <!-- Глубокий темно-розовый/коричневый фон -->
+    <color name="surface_dark">#2C1E22</color>          <!-- Фон карточек в темной теме -->
+    <color name="text_primary_dark">#F5F5F5</color>     <!-- Светлый текст для темной темы -->
+    <color name="text_secondary_dark">#B0B0B0</color>   <!-- Серый текст для темной темы -->
+
+    <!-- Системные цвета -->
+    <color name="error_red">#CF6679</color>             <!-- Для ошибок и кнопки "Выйти" -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 </resources>
