@@ -1,21 +1,24 @@
 package com.example.curs.ui;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.curs.R;
-import com.example.curs.data.repository.PetRepository;
 import com.example.curs.data.local.PetEntity;
+import com.example.curs.data.repository.PetRepository;
 import com.example.curs.data.repository.StorageRepository;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.UUID;
 
 public class AddEditPetActivity extends AppCompatActivity {
@@ -24,6 +27,7 @@ public class AddEditPetActivity extends AppCompatActivity {
     private ImageView ivAddPhoto;
     private ProgressBar progressBar;
     private Uri selectedImageUri;
+
     private PetRepository petRepository;
     private StorageRepository storageRepository;
 
@@ -68,8 +72,16 @@ public class AddEditPetActivity extends AppCompatActivity {
         }
 
         String petId = UUID.randomUUID().toString();
+        String ownerId = FirebaseAuth.getInstance().getUid();
+
+        if (ownerId == null) {
+            Toast.makeText(this, "Ошибка: вы не авторизованы", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         PetEntity newPet = new PetEntity();
         newPet.id = petId;
+        newPet.ownerId = ownerId;
         newPet.name = name;
         newPet.species = species;
         newPet.breed = breed;
@@ -87,7 +99,6 @@ public class AddEditPetActivity extends AppCompatActivity {
                 public void onFailure(String error) {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(AddEditPetActivity.this, "Ошибка фото: " + error, Toast.LENGTH_SHORT).show();
-                    // Сохраняем без фото, если загрузка не удалась
                     saveToLocal(newPet);
                 }
             });
@@ -96,6 +107,7 @@ public class AddEditPetActivity extends AppCompatActivity {
         }
     }
 
+    // Тот самый метод, на который ругалась студия
     private void saveToLocal(PetEntity pet) {
         petRepository.savePet(pet);
         runOnUiThread(() -> {

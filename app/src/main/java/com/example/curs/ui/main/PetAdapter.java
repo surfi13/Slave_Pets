@@ -1,4 +1,4 @@
-package com.example.curs.data;
+package com.example.curs.ui.main;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +12,6 @@ import com.example.curs.R;
 import com.example.curs.data.local.PetEntity;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
 

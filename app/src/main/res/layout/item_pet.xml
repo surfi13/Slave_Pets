@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_height="64dp"
             android:layout_gravity="center_vertical"
             android:scaleType="centerCrop"
-            android:background="?attr/colorSecondaryContainer"
+            android:background="#FCE4EC"
             android:src="@android:drawable/ic_menu_gallery" />
 
         <LinearLayout
@@ -38,7 +39,7 @@
                 android:text="Кличка"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="#212121" />
 
             <TextView
                 android:id="@+id/tvPetInfo"
@@ -46,7 +47,8 @@
                 android:layout_height="wrap_content"
                 android:text="Вид, Порода"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="#757575" />
+
         </LinearLayout>
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>
