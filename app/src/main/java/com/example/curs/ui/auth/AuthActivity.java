@@ -1,6 +1,8 @@
 package com.example.curs.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,7 @@ import com.example.curs.ui.main.MainActivity;
 import com.example.curs.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -40,9 +43,8 @@ public class AuthActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Проверяем, авторизован ли уже пользователь
         try {
-            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 goToMain();
                 return;
             }
@@ -95,8 +97,25 @@ public class AuthActivity extends AppCompatActivity {
             }
         });
 
+        // ПРИ УСПЕШНОМ ВХОДЕ СОХРАНЯЕМ ID В ПАМЯТЬ ТЕЛЕФОНА
         viewModel.getIsAuthSuccessful().observe(this, isSuccess -> {
             if (Boolean.TRUE.equals(isSuccess)) {
+                String uid = FirebaseAuth.getInstance().getUid();
+
+                // Если Firebase не дал ID (офлайн), пробуем взять email и сохранить его как временный ID
+                if (uid == null) {
+                    String email = etEmail.getText() != null ? etEmail.getText().toString() : "";
+                    SharedPreferences prefs = getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+                    // Берем ранее сохраненный ID по этому email (если есть)
+                    uid = prefs.getString("uid_" + email, "offline_user");
+                }
+
+                if (uid != null) {
+                    getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                            .edit()
+                            .putString("last_user_id", uid)
+                            .apply();
+                }
                 goToMain();
             }
         });
@@ -130,6 +149,6 @@ public class AuthActivity extends AppCompatActivity {
         Intent intent = new Intent(AuthActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish(); // Закрываем экран авторизации
+        finish();
     }
 }

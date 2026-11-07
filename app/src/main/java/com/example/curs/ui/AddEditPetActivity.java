@@ -1,5 +1,8 @@
 package com.example.curs.ui;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -71,14 +74,18 @@ public class AddEditPetActivity extends AppCompatActivity {
             return;
         }
 
-        String petId = UUID.randomUUID().toString();
+        // 1. Получаем ID пользователя (из Firebase или из памяти телефона)
         String ownerId = FirebaseAuth.getInstance().getUid();
+        if (ownerId == null) {
+            ownerId = getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).getString("last_user_id", null);
+        }
 
         if (ownerId == null) {
-            Toast.makeText(this, "Ошибка: вы не авторизованы", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка авторизации. Выйдите и войдите заново.", Toast.LENGTH_LONG).show();
             return;
         }
 
+        String petId = UUID.randomUUID().toString();
         PetEntity newPet = new PetEntity();
         newPet.id = petId;
         newPet.ownerId = ownerId;
@@ -86,28 +93,47 @@ public class AddEditPetActivity extends AppCompatActivity {
         newPet.species = species;
         newPet.breed = breed;
 
-        if (selectedImageUri != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            storageRepository.uploadPetPhoto(petId, selectedImageUri, new StorageRepository.UploadCallback() {
-                @Override
-                public void onSuccess(String downloadUrl) {
-                    newPet.photoUrl = downloadUrl;
-                    saveToLocal(newPet);
-                }
+        // 2. Проверяем наличие интернета
+        if (isNetworkAvailable()) {
+            // Интернет есть - пытаемся загрузить фото на ImgBB
+            if (selectedImageUri != null) {
+                progressBar.setVisibility(View.VISIBLE);
+                storageRepository.uploadPetPhoto(this, selectedImageUri, new StorageRepository.UploadCallback() {
+                    @Override
+                    public void onSuccess(String downloadUrl) {
+                        newPet.photoUrl = downloadUrl;
+                        saveToLocal(newPet);
+                    }
 
-                @Override
-                public void onFailure(String error) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(AddEditPetActivity.this, "Ошибка фото: " + error, Toast.LENGTH_SHORT).show();
-                    saveToLocal(newPet);
-                }
-            });
+                    @Override
+                    public void onFailure(String error) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(AddEditPetActivity.this, "Ошибка фото: " + error, Toast.LENGTH_SHORT).show();
+                        saveToLocal(newPet); // Сохраняем без фото
+                    }
+                });
+            } else {
+                saveToLocal(newPet); // Без фото
+            }
         } else {
+            // Интернета нет - сохраняем только текстовые данные
+            Toast.makeText(this, "Нет интернета. Питомец сохранен локально, фото не добавлено.", Toast.LENGTH_LONG).show();
             saveToLocal(newPet);
         }
     }
 
-    // Тот самый метод, на который ругалась студия
+    /**
+     * Проверка наличия интернет-соединения
+     */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
+    }
+
     private void saveToLocal(PetEntity pet) {
         petRepository.savePet(pet);
         runOnUiThread(() -> {
