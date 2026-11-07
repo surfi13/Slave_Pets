@@ -34,47 +34,54 @@ public class AuthRepository {
 
     public void login(String email, String password, AuthCallback callback) {
         executor.execute(() -> {
-            // 1. Проверяем локальную базу (офлайн-вход)
+            // 1. ОФЛАЙН ВХОД
             UserEntity localUser = userDao.getUserByEmail(email);
             if (localUser != null && localUser.passwordHash.equals(password)) {
+
+                // ВАЖНО: Пытаемся восстановить сессию Firebase в фоне, чтобы работал getUid()
+                try {
+                    mAuth.signInWithEmailAndPassword(email, password);
+                } catch (Exception e) {
+                    Log.e("AUTH", "Нет сети для входа в Firebase: " + e.getMessage());
+                }
+
                 callback.onSuccess();
                 syncUserDataFromCloud(localUser.id);
-            } else {
-                // 2. Если локально нет, идем в Firebase
-                try {
-                    mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful() && task.getResult().getUser() != null) {
-                                    String uid = task.getResult().getUser().getUid();
+                return;
+            }
 
-                                    // СНАЧАЛА СООБЩАЕМ ОБ УСПЕХЕ (чтобы UI перешел на главный экран)
-                                    callback.onSuccess();
+            // 2. ОНЛАЙН ВХОД
+            try {
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult().getUser() != null) {
+                                String uid = task.getResult().getUser().getUid();
 
-                                    // ПОТОМ В ФОНЕ СОХРАНЯЕМ ПОЛЬЗОВАТЕЛЯ И КАЧАЕМ ДАННЫЕ
-                                    db.collection("users").document(uid).get()
-                                            .addOnSuccessListener(documentSnapshot -> {
-                                                UserEntity cloudUser = documentSnapshot.toObject(UserEntity.class);
-                                                if (cloudUser != null) {
-                                                    cloudUser.passwordHash = password;
-                                                    cloudUser.isSynced = true;
-                                                    executor.execute(() -> userDao.insertUser(cloudUser));
-                                                    syncUserDataFromCloud(uid);
-                                                }
-                                            });
-                                } else {
-                                    callback.onFailure("Неверный email или пароль");
-                                }
-                            })
-                            .addOnFailureListener(e -> {
-                                if (e instanceof com.google.firebase.FirebaseNetworkException) {
-                                    callback.onFailure("Нет интернета. Войдите с аккаунтом, который уже использовался.");
-                                } else {
-                                    callback.onFailure("Ошибка входа: " + e.getMessage());
-                                }
-                            });
-                } catch (Exception e) {
-                    callback.onFailure("Критическая ошибка: " + e.getMessage());
-                }
+                                callback.onSuccess();
+
+                                db.collection("users").document(uid).get()
+                                        .addOnSuccessListener(documentSnapshot -> {
+                                            UserEntity cloudUser = documentSnapshot.toObject(UserEntity.class);
+                                            if (cloudUser != null) {
+                                                cloudUser.passwordHash = password;
+                                                cloudUser.isSynced = true;
+                                                executor.execute(() -> userDao.insertUser(cloudUser));
+                                                syncUserDataFromCloud(uid);
+                                            }
+                                        });
+                            } else {
+                                callback.onFailure("Неверный email или пароль");
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            if (e instanceof com.google.firebase.FirebaseNetworkException) {
+                                callback.onFailure("Нет интернета. Войдите с аккаунтом, который уже использовался.");
+                            } else {
+                                callback.onFailure("Ошибка входа: " + e.getMessage());
+                            }
+                        });
+            } catch (Exception e) {
+                callback.onFailure("Критическая ошибка: " + e.getMessage());
             }
         });
     }
@@ -90,6 +97,9 @@ public class AuthRepository {
                             petDao.insertPet(pet);
                         }
                     });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Sync", "Ошибка синхронизации (возможно нет сети): " + e.getMessage());
                 });
     }
 
@@ -113,6 +123,9 @@ public class AuthRepository {
                         callback.onFailure("Ошибка регистрации: " +
                                 (task.getException() != null ? task.getException().getMessage() : "Неизвестно"));
                     }
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure("Ошибка сети: " + e.getMessage());
                 });
     }
 }
