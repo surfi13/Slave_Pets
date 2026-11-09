@@ -13,6 +13,8 @@ import com.example.curs.data.local.PetEntity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
+
 public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
 
     private List<PetEntity> pets = new ArrayList<>();
@@ -20,6 +22,7 @@ public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
 
     public interface OnPetClickListener {
         void onPetClick(PetEntity pet);
+        void onPetDelete(PetEntity pet);
     }
 
     public void setListener(OnPetClickListener listener) {
@@ -47,6 +50,8 @@ public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
         if (pet.photoUrl != null && !pet.photoUrl.isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(pet.photoUrl)
+                    .transform(new CropCircleTransformation()) // Делаем фото круглым
+                    .placeholder(android.R.drawable.ic_menu_gallery)
                     .into(holder.ivPhoto);
         } else {
             holder.ivPhoto.setImageResource(android.R.drawable.ic_menu_gallery);
@@ -54,6 +59,11 @@ public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onPetClick(pet);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) listener.onPetDelete(pet);
+            return true;
         });
     }
 
