@@ -1,3 +1,54 @@
 <resources>
-    <string name="app_name">MyPet</string>
+    <string name="app_name">Забота о питомцах</string>
+
+    <!-- Экран авторизации -->
+    <string name="welcome_title">Добро пожаловать!</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Пароль</string>
+    <string name="btn_login">Войти</string>
+    <string name="btn_register">Зарегистрироваться</string>
+    <string name="toggle_register">Нет аккаунта? Зарегистрироваться</string>
+    <string name="toggle_login">Уже есть аккаунт? Войти</string>
+    <string name="error_empty_fields">Заполните все поля</string>
+    <string name="error_password_length">Пароль должен содержать минимум 6 символов</string>
+    <string name="error_network">Нет подключения к интернету. Войдите с аккаунтом, который уже использовался на этом устройстве.</string>
+    <string name="error_login_failed">Неверный email или пароль</string>
+    <string name="error_register_failed">Ошибка регистрации</string>
+    <string name="error_not_authorized">Ошибка авторизации. Выйдите и войдите заново.</string>
+
+    <!-- Диалог о проекте -->
+    <string name="about_project">О проекте</string>
+    <string name="project_title">О курсовом проекте</string>
+    <string name="project_info">Тема: Разработка мобильного приложения для учёта домашних питомцев с напоминаниями о вакцинации\n\nВыполнил: Иванов Иван Иванович\nГруппа: 09.02.07\nРуководитель: Егорова Елена Николаевна\n\nГАПОУ ОКЭИ, 2026 г.</string>
+    <string name="btn_close">Закрыть</string>
+
+    <!-- Главный экран -->
+    <string name="my_pets">Мои питомцы</string>
+    <string name="btn_logout">Выйти</string>
+    <string name="btn_settings">Настройки</string>
+    <string name="logout_success">Вы вышли из аккаунта</string>
+    <string name="delete_pet_title">Удалить питомца?</string>
+    <string name="delete_pet_message">Вы уверены, что хотите удалить %1$s?</string>
+    <string name="delete_yes">Да</string>
+    <string name="delete_no">Нет</string>
+    <string name="pet_deleted">Питомец удален</string>
+    <string name="btn_add_pet">Добавить питомца</string>
+    <string name="hint_name">Кличка</string>
+    <string name="hint_species">Вид (Кошка, Собака и т.д.)</string>
+    <string name="hint_breed">Порода</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_pick_photo">Выбрать фото</string>
+    <string name="pet_saved">Питомец сохранен</string>
+    <string name="pet_saved_offline">Нет интернета. Питомец сохранен локально, фото не добавлено.</string>
+    <string name="fill_name_species">Заполните кличку и вид</string>
+    <string name="photo_error">Ошибка фото: %1$s</string>
+
+    <!-- Настройки -->
+    <string name="settings_language">Язык приложения</string>
+    <string name="settings_theme">Тема оформления</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_en">Английский</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Темная</string>
+    <string name="theme_system">Системная</string>
 </resources>

@@ -35,6 +35,23 @@ public class PetRepository {
         });
     }
 
+    public void updatePet(PetEntity pet) {
+        executor.execute(() -> {
+            pet.isSynced = false;
+            petDao.updatePet(pet);
+            syncPetToFirebase(pet);
+        });
+    }
+
+    public void deletePet(PetEntity pet) {
+        executor.execute(() -> {
+            petDao.deletePet(pet);
+            db.collection("pets").document(pet.id).delete()
+                    .addOnSuccessListener(aVoid -> Log.d("Delete", "Удалено из Firebase"))
+                    .addOnFailureListener(e -> Log.e("Delete", "Ошибка удаления: " + e.getMessage()));
+        });
+    }
+
     private void syncPetToFirebase(PetEntity pet) {
         db.collection("pets").document(pet.id)
                 .set(pet)
@@ -44,12 +61,9 @@ public class PetRepository {
                         petDao.updatePet(pet);
                     });
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Sync", "Ошибка сохранения: " + e.getMessage());
-                });
+                .addOnFailureListener(e -> Log.e("Sync", "Ошибка сохранения: " + e.getMessage()));
     }
 
-    // МЕТОД, КОТОРЫЙ ТРЕБУЕТ ВАШ NetworkMonitor
     public void syncPendingData() {
         executor.execute(() -> {
             List<PetEntity> unsyncedPets = petDao.getUnsyncedPets();
@@ -59,7 +73,6 @@ public class PetRepository {
         });
     }
 
-    // МЕТОД ДЛЯ ЗАГРУЗКИ ПРИ СТАРТЕ (вызывается в MainActivity)
     public void fetchPetsFromCloud() {
         String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null) return;
@@ -76,8 +89,9 @@ public class PetRepository {
                         }
                     });
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Sync", "Ошибка скачивания: " + e.getMessage());
-                });
+                .addOnFailureListener(e -> Log.e("Sync", "Ошибка скачивания: " + e.getMessage()));
+    }
+    public PetEntity getPetById(String id) {
+        return petDao.getPetById(id);
     }
 }
