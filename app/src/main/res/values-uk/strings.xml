@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">Мої улюбленці</string>
+
+    <!-- НИЖНЄ МЕНЮ -->
+    <string name="nav_home">Головна</string>
+    <string name="nav_add">Додати</string>
+    <string name="nav_profile">Профіль</string>
+
+    <!-- АВТОРИЗАЦІЯ -->
+    <string name="auth_welcome">Ласкаво просимо!</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_login">Увійти</string>
+    <string name="auth_register">Зареєструватися</string>
+    <string name="auth_no_account">Немає акаунту? Зареєструватися</string>
+    <string name="auth_has_account">Вже є акаунт? Увійти</string>
+
+    <!-- ПРОФІЛЬ -->
+    <string name="profile_title">Профіль</string>
+    <string name="profile_name">Ім\'я</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_save">Зберегти</string>
+    <string name="profile_change_password">Змінити пароль</string>
+    <string name="profile_settings">Налаштування</string>
+    <string name="profile_logout">Вийти з акаунту</string>
+
+    <!-- ЗМІНА ПАРОЛЯ -->
+    <string name="pwd_current">Поточний пароль</string>
+    <string name="pwd_new">Новий пароль</string>
+    <string name="pwd_change">Змінити пароль</string>
+
+    <!-- НАЛАШТУВАННЯ -->
+    <string name="settings_title">Налаштування</string>
+    <string name="settings_language">Мова</string>
+    <string name="settings_lang_ru">Русский</string>
+    <string name="settings_lang_en">English</string>
+    <string name="settings_lang_uk">Українська</string>
+
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_system">Системна</string>
+    <string name="settings_theme_light">Світла</string>
+    <string name="settings_theme_dark">Темна</string>
+
+    <!-- УЛЮБЛЕНЦІ -->
+    <string name="pets_title">Мої улюбленці</string>
+    <string name="pet_name">Ім\'я</string>
+    <string name="pet_species">Вид</string>
+    <string name="pet_breed">Порода</string>
+    <string name="pet_pick_photo">Обрати фото</string>
+    <string name="pet_save">Зберегти</string>
+</resources>

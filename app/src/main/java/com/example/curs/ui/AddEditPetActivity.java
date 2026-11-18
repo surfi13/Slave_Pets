@@ -27,7 +27,7 @@ import java.util.UUID;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
-public class AddEditPetActivity extends AppCompatActivity {
+public class AddEditPetActivity extends BaseActivity {
 
     private TextInputEditText etName, etBreed;
     private AutoCompleteTextView etSpecies;

@@ -1,19 +1,16 @@
 package com.example.curs.ui.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.widget.RadioGroup;
-
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-
 import com.example.curs.R;
+import com.example.curs.ui.BaseActivity;
+import com.example.curs.ui.auth.AuthActivity;
 
-import java.util.Locale;
-
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends BaseActivity {
 
     private SharedPreferences prefs;
 
@@ -27,24 +24,33 @@ public class SettingsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         prefs = getSharedPreferences("Settings", MODE_PRIVATE);
-
         RadioGroup rgLang = findViewById(R.id.rgLanguage);
         RadioGroup rgTheme = findViewById(R.id.rgTheme);
 
-        String lang = prefs.getString("lang", "ru");
-        rgLang.check(lang.equals("en") ? R.id.rbEnglish : R.id.rbRussian);
-
-        int theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        if (theme == AppCompatDelegate.MODE_NIGHT_YES) rgTheme.check(R.id.rbDark);
-        else if (theme == AppCompatDelegate.MODE_NIGHT_NO) rgTheme.check(R.id.rbLight);
-        else rgTheme.check(R.id.rbSystem);
+        // --- ЯЗЫК ---
+        String currentLang = prefs.getString("language", "ru");
+        if (currentLang.equals("en")) {
+            rgLang.check(R.id.rbEnglish);
+        } else if (currentLang.equals("uk")) {
+            rgLang.check(R.id.rbUkrainian);
+        } else {
+            rgLang.check(R.id.rbRussian);
+        }
 
         rgLang.setOnCheckedChangeListener((group, checkedId) -> {
-            String newLang = checkedId == R.id.rbEnglish ? "en" : "ru";
-            prefs.edit().putString("lang", newLang).apply();
-            setLocale(newLang);
-            recreate();
+            String newLang = "ru";
+            if (checkedId == R.id.rbEnglish) newLang = "en";
+            else if (checkedId == R.id.rbUkrainian) newLang = "uk";
+
+            prefs.edit().putString("language", newLang).apply();
+            restartApp(); // Перезапуск, чтобы язык применился
         });
+
+        // --- ТЕМА ---
+        int currentTheme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        if (currentTheme == AppCompatDelegate.MODE_NIGHT_YES) rgTheme.check(R.id.rbDark);
+        else if (currentTheme == AppCompatDelegate.MODE_NIGHT_NO) rgTheme.check(R.id.rbLight);
+        else rgTheme.check(R.id.rbSystem);
 
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
             int mode;
@@ -53,15 +59,15 @@ public class SettingsActivity extends AppCompatActivity {
             else mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 
             prefs.edit().putInt("theme", mode).apply();
-            AppCompatDelegate.setDefaultNightMode(mode);
+            AppCompatDelegate.setDefaultNightMode(mode); // Мгновенно применяем тему
         });
     }
 
-    private void setLocale(String lang) {
-        Locale locale = new Locale(lang);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+    private void restartApp() {
+        Intent intent = new Intent(this, AuthActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+        overridePendingTransition(0, 0);
     }
 }

@@ -6,18 +6,20 @@
     android:orientation="vertical"
     android:background="?attr/colorSurface">
 
+    <!-- Верхняя панель с кнопкой "Назад" -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarSettings"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:navigationIcon="@android:drawable/ic_menu_revert"
-        app:title="Настройки"
+        app:title="@string/settings_title"
         app:titleTextColor="?attr/colorOnPrimary" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,40 +27,59 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- ================= ЯЗЫК ================= -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Язык"
+                android:layout_marginBottom="8dp"
+                android:text="@string/settings_language"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:id="@+id/rgLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="32dp">
 
                 <RadioButton
                     android:id="@+id/rbRussian"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Русский" />
+                    android:text="@string/settings_lang_ru"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
 
                 <RadioButton
                     android:id="@+id/rbEnglish"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="English" />
+                    android:text="@string/settings_lang_en"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
+
+                <RadioButton
+                    android:id="@+id/rbUkrainian"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_lang_uk"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
             </RadioGroup>
 
+            <!-- ================= ТЕМА ================= -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Тема"
+                android:layout_marginBottom="8dp"
+                android:text="@string/settings_theme"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:id="@+id/rgTheme"
@@ -69,19 +90,28 @@
                     android:id="@+id/rbSystem"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Системная" />
+                    android:text="@string/settings_theme_system"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
 
                 <RadioButton
                     android:id="@+id/rbLight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Светлая" />
+                    android:text="@string/settings_theme_light"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
 
                 <RadioButton
                     android:id="@+id/rbDark"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Тёмная" />
+                    android:text="@string/settings_theme_dark"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
             </RadioGroup>
 
         </LinearLayout>

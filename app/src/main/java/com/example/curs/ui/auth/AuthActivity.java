@@ -15,14 +15,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
-
+import com.example.curs.ui.BaseActivity;
 import com.example.curs.ui.main.MainActivity;
 import com.example.curs.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class AuthActivity extends AppCompatActivity {
+public class AuthActivity extends BaseActivity {
 
     private AuthViewModel viewModel;
     private TextInputEditText etEmail, etPassword;
