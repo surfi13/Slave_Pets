@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.example.curs.data.repository.AuthRepository;
+import com.example.curs.data.local.AppDatabase;
 
 public class AuthViewModel extends AndroidViewModel {
     private final AuthRepository authRepository;
@@ -43,11 +44,9 @@ public class AuthViewModel extends AndroidViewModel {
         AuthRepository.AuthCallback callback = new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess() {
-                // Принудительно выполняем в главном потоке (UI)
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    isLoading.setValue(false);
-                    isAuthSuccessful.setValue(true);
-                });
+                AppDatabase.reset();       // ← открыть БД этого uid при следующем getDatabase()
+                isLoading.setValue(false);
+                isAuthSuccessful.setValue(true);
             }
 
             @Override

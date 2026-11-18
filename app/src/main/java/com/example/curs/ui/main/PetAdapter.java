@@ -6,14 +6,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.curs.R;
 import com.example.curs.data.local.PetEntity;
 import java.util.ArrayList;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
 
@@ -50,19 +49,28 @@ public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
         if (pet.photoUrl != null && !pet.photoUrl.isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(pet.photoUrl)
-                    .transform(new CropCircleTransformation()) // Делаем фото круглым
+                    .circleCrop()
                     .placeholder(android.R.drawable.ic_menu_gallery)
                     .into(holder.ivPhoto);
         } else {
             holder.ivPhoto.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
+        // Обычный клик - Редактирование
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onPetClick(pet);
         });
 
+        // Долгий клик - Удаление с подтверждением
         holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null) listener.onPetDelete(pet);
+            new AlertDialog.Builder(holder.itemView.getContext())
+                    .setTitle("Удалить питомца?")
+                    .setMessage("Вы уверены, что хотите удалить " + pet.name + "? Это действие нельзя отменить.")
+                    .setPositiveButton("Да, удалить", (dialog, which) -> {
+                        if (listener != null) listener.onPetDelete(pet);
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
             return true;
         });
     }
