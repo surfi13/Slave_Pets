@@ -2,7 +2,7 @@ package com.example.curs.data.remote;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
+import com.example.curs.data.local.AppDatabase;
 public class AuthFacade {
     private final FirebaseAuth mAuth;
 
@@ -40,6 +40,7 @@ public class AuthFacade {
     }
     public void logout() {
         mAuth.signOut();
+        AppDatabase.reset();
     }
 
     public interface AuthCallback {
